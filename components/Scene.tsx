@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import type { ElementRef } from "react";
 import { OrbitControls, Environment } from "@react-three/drei";
 import { BoxLetter } from "@/components/BoxLetter";
 import { DanglingText } from "@/components/DanglingText";
@@ -6,18 +7,13 @@ import { isMobile } from "@/utils/deviceDetection";
 import * as THREE from "three";
 
 export const Scene = () => {
-  const orbitControlsRef = useRef<any>(null);
+  const orbitControlsRef = useRef<ElementRef<typeof OrbitControls>>(null);
   const heimerGroupRef = useRef<THREE.Group>(null);
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [isMobileDevice] = useState(() => isMobile());
   const [autoRotateSpeed, setAutoRotateSpeed] = useState(0.5);
   const [isUserInteracting, setIsUserInteracting] = useState(false);
-  const lastDragVelocity = useRef(0);
   const dragStartTime = useRef(0);
   const dragStartAngle = useRef(0);
-
-  useEffect(() => {
-    setIsMobileDevice(isMobile());
-  }, []);
 
   useEffect(() => {
     const controls = orbitControlsRef.current;
@@ -38,15 +34,12 @@ export const Scene = () => {
       if (timeDiff > 0) {
         // Calculate velocity (radians per second)
         const velocity = angleDiff / timeDiff;
-        lastDragVelocity.current = velocity;
 
-        // Convert velocity to auto-rotate speed (degrees per second)
-        // OrbitControls autoRotateSpeed is in degrees per second
-        // REVERSE THE DIRECTION by negating the velocity
+        // Convert velocity to auto-rotate speed (degrees per second).
+        // Negate to reverse direction after drag.
         const newSpeed = -(velocity * 180) / Math.PI;
 
-        // Set speed to match initial page load speed (0.5)
-        // Keep the direction based on drag, but use consistent speed
+        // Keep consistent speed magnitude (0.5), preserve drag direction.
         const direction = newSpeed >= 0 ? 1 : -1;
         setAutoRotateSpeed(direction * 0.5);
       }
@@ -133,11 +126,7 @@ export const Scene = () => {
       <ambientLight intensity={0.5} />
       <directionalLight position={[5, 5, 5]} intensity={0.5} color="#ffffff" />
       <Environment
-        files={
-          isMobileDevice
-            ? "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/download3-7FArHVIJTFszlXm2045mQDPzsZqAyo.jpg"
-            : "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/dither_it_M3_Drone_Shot_equirectangular-jpg_San_Francisco_Big_City_1287677938_12251179%20(1)-NY2qcmpjkyG6rDp1cPGIdX0bHk3hMR.jpg"
-        }
+        files={isMobileDevice ? "/env-mobile.jpg" : "/env-desktop.jpg"}
         background
       />
     </>

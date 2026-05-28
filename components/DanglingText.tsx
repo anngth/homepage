@@ -6,7 +6,7 @@ import * as THREE from "three";
 interface DanglingTextProps {
   text: string;
   position: [number, number, number];
-  parentRotationRef: React.RefObject<THREE.Group>;
+  parentRotationRef: React.RefObject<THREE.Group | null>;
   color: string;
   scale?: number;
   isUserInteracting?: boolean;
@@ -14,8 +14,6 @@ interface DanglingTextProps {
 
 // Animation configuration constants
 const ANIMATION_CONFIG = {
-  FLOAT_UPDATE_INTERVAL: 0.016, // ~60fps for smoother animation
-  INTERACTION_DEBOUNCE: 0.1, // Reduced to 100ms for faster response
   SWING_THRESHOLD: 0.003,
   SWING_TARGET_THRESHOLD: 0.02,
   SWAY_INFLUENCE: 0.1,
@@ -41,16 +39,12 @@ export const DanglingText = ({
 }: DanglingTextProps) => {
   const group = useRef<THREE.Group>(null);
 
-  // Animation state
-  const [swing, setSwing] = useState(0);
-  const [floatOffset, setFloatOffset] = useState({ x: 0, y: 0, z: 0 });
-
-  // Animation refs for performance
+  // All animation state lives in refs — no React re-renders during animation.
+  const swingRef = useRef(0);
   const swingVelocity = useRef(0);
   const lastParentRot = useRef(0);
-  const lastFloatUpdate = useRef(0);
 
-  // Random seeds for natural movement
+  // Random seeds for natural movement — stable across renders.
   const [randomSeed] = useState(() => Math.random() * 1000);
   const [floatSeeds] = useState(() => ({
     x: Math.random() * 1000,
@@ -73,102 +67,61 @@ export const DanglingText = ({
           ANIMATION_CONFIG.SPEED_RANGE.Z.min),
   }));
 
-  // Helper function to update float animation
-  const updateFloatAnimation = (time: number): void => {
-    if (time - lastFloatUpdate.current < ANIMATION_CONFIG.FLOAT_UPDATE_INTERVAL)
+  useFrame((state, delta) => {
+    if (isUserInteracting || !group.current || !parentRotationRef.current)
       return;
 
-    lastFloatUpdate.current = time;
-    const newFloatOffset = {
-      x:
-        Math.sin(time * floatSeeds.speedX + floatSeeds.x) *
-        ANIMATION_CONFIG.AMPLITUDE.X,
-      y:
-        Math.sin(time * floatSeeds.speedY + floatSeeds.y) *
-        ANIMATION_CONFIG.AMPLITUDE.Y,
-      z:
-        Math.sin(time * floatSeeds.speedZ + floatSeeds.z) *
-        ANIMATION_CONFIG.AMPLITUDE.Z,
-    };
-    setFloatOffset(newFloatOffset);
-  };
+    const currentTime = state.clock.elapsedTime;
+    const parentY = parentRotationRef.current.rotation.y;
 
-  // Helper function to update swing physics
-  const updateSwingPhysics = (
-    parentY: number,
-    delta: number,
-    currentTime: number
-  ): void => {
-    // Spring physics constants
+    // --- Float animation: mutate position directly, no setState ---
+    group.current.position.set(
+      position[0] +
+        Math.sin(currentTime * floatSeeds.speedX + floatSeeds.x) *
+          ANIMATION_CONFIG.AMPLITUDE.X,
+      position[1] +
+        Math.sin(currentTime * floatSeeds.speedY + floatSeeds.y) *
+          ANIMATION_CONFIG.AMPLITUDE.Y,
+      position[2] +
+        Math.sin(currentTime * floatSeeds.speedZ + floatSeeds.z) *
+          ANIMATION_CONFIG.AMPLITUDE.Z,
+    );
+
+    // --- Swing physics: mutate rotation.z directly, no setState ---
     const stiffness = 4;
     const damping = 3;
 
-    // Calculate spring force
-    const force = stiffness * (parentY - swing);
+    const force = stiffness * (parentY - swingRef.current);
     swingVelocity.current += force * delta;
     swingVelocity.current *= Math.exp(-damping * delta);
 
-    // Add natural sway
     const sway = Math.sin(currentTime * 0.5 + randomSeed) * 0.01;
     const swingChange =
       swingVelocity.current * delta +
       sway * delta * ANIMATION_CONFIG.SWAY_INFLUENCE;
 
-    // Update swing if change is significant
     if (
       Math.abs(swingChange) > ANIMATION_CONFIG.SWING_THRESHOLD ||
-      Math.abs(parentY - swing) > ANIMATION_CONFIG.SWING_TARGET_THRESHOLD
+      Math.abs(parentY - swingRef.current) >
+        ANIMATION_CONFIG.SWING_TARGET_THRESHOLD
     ) {
-      setSwing((prev) => {
-        const next = prev + swingChange;
-        if (group.current) {
-          group.current.rotation.z = next;
-        }
-        return next;
-      });
+      swingRef.current += swingChange;
+      group.current.rotation.z = swingRef.current;
     }
-  };
-
-  useFrame((state, delta) => {
-    // Completely disable animation when user is interacting
-    if (isUserInteracting) {
-      // console.log('Animation paused - user interacting');
-      return;
-    }
-
-    if (!parentRotationRef.current) return;
-
-    const parentY = parentRotationRef.current.rotation.y;
-    const currentTime = state.clock.elapsedTime;
-
-    // console.log('Animation running');
-    updateFloatAnimation(currentTime);
-    updateSwingPhysics(parentY, delta, currentTime);
 
     lastParentRot.current = parentY;
   });
 
-  // Split text into letters and center - memoized for performance
+  // Split text into letters and center — memoized for performance.
   const { letters, totalWidth, letterSpacing } = useMemo(() => {
     const letterArray = text.toUpperCase().split("");
-    const spacing = 0.95; // Balanced spacing - not too tight, not too loose
+    const spacing = 0.95;
     const width = (letterArray.length - 1) * spacing;
     return { letters: letterArray, totalWidth: width, letterSpacing: spacing };
   }, [text]);
 
   return (
-    <group
-      ref={group}
-      position={
-        isUserInteracting
-          ? position
-          : [
-              position[0] + floatOffset.x,
-              position[1] + floatOffset.y,
-              position[2] + floatOffset.z,
-            ]
-      }
-    >
+    <group ref={group} position={isUserInteracting ? position : undefined}>
       {letters.map((letter, idx) =>
         letter !== " " ? (
           <BoxLetter
@@ -178,7 +131,7 @@ export const DanglingText = ({
             scale={scale}
             color={color}
           />
-        ) : null
+        ) : null,
       )}
     </group>
   );
