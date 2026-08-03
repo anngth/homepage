@@ -22,7 +22,7 @@ Interactive 3D scene built with Next.js and React Three Fiber. Clean architectur
 - Next.js 15 (React 19, TypeScript)
 - React Three Fiber (@react-three/fiber), Three.js, @react-three/drei
 - Tailwind CSS v4
-- next-themes, @vercel/analytics
+- next-themes
 - pnpm, GitHub Actions, Vercel
 
 ## 🗂️ Structure

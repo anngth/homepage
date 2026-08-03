@@ -34,14 +34,13 @@ const nextConfig = {
               "default-src 'self'",
               // unsafe-inline required in production: Next.js RSC injects self.__next_f.push(...)
               // inline scripts for hydration. unsafe-eval only needed in dev (React call stack).
-              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://va.vercel-scripts.com`,
+              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
               "style-src 'self' 'unsafe-inline'",
               // Local assets only — env maps now served from public/.
               "img-src 'self' data: blob:",
               "media-src 'self'",
               "font-src 'self'",
-              // Vercel Analytics and Speed Insights.
-              "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com",
+              "connect-src 'self'",
               "worker-src blob:",
               "frame-ancestors 'none'",
             ].join("; "),

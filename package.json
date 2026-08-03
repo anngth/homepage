@@ -14,36 +14,33 @@
     "changelog": "node scripts/extract-changelog.js"
   },
   "dependencies": {
-    "@radix-ui/react-slot": "1.1.1",
-    "@react-three/drei": "^10.6.1",
-    "@react-three/fiber": "^9.3.0",
-    "@vercel/analytics": "^1.5.0",
-    "@vercel/speed-insights": "^1.2.0",
+    "@radix-ui/react-slot": "^1.3.3",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.7.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "next": "16.2.6",
-    "next-themes": "^0.4.4",
-    "react": "^19",
-    "react-dom": "^19",
-    "tailwind-merge": "^2.5.5",
-    "three": "^0.179.1"
+    "next-themes": "^0.4.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwind-merge": "^2.6.1",
+    "three": "^0.185.1"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^22",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@types/three": "0.182.0",
-    "eslint": "^9.39.4",
-    "eslint-config-next": "^16.2.6",
-    "postcss": "^8.5.15",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.20.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@types/three": "0.185.3",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.12",
+    "postcss": "^8.5.25",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@10.12.4",
   "pnpm": {
     "neverBuiltDependencies": [
-      "@vercel/speed-insights",
       "sharp"
     ],
     "overrides": {
