@@ -1,6 +1,6 @@
 # homepage – Interactive 3D Scene
 
-[![Deploy and Release](https://github.com/nguyenthanhan/homepage/actions/workflows/deploy-and-release.yml/badge.svg)](https://github.com/nguyenthanhan/homepage/actions/workflows/deploy-and-release.yml)
+[![Deploy and Release](https://github.com/anngth/homepage/actions/workflows/deploy-and-release.yml/badge.svg)](https://github.com/anngth/homepage/actions/workflows/deploy-and-release.yml)
 [![Deploy on Vercel](https://img.shields.io/badge/Deploy%20on-Vercel-black)](https://vercel.com/heimers-projects/homepage)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
